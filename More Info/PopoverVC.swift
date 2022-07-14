@@ -32,7 +32,7 @@ class PopoverVC: UIViewController {
   
   private var dope = CGFloat()
   
-  private lazy var zoomOutButton: UIButton = {
+  public lazy var zoomOutButton: UIButton = {
     let button = UIButton(type: .system)
     button.setTitle("A", for: .normal)
     button.setTitleColor(UIColor.systemBlue, for: .normal)
@@ -43,7 +43,7 @@ class PopoverVC: UIViewController {
     return button
   }()
   
-  private lazy var zoomInButton: UIButton = {
+  public lazy var zoomInButton: UIButton = {
     let button = UIButton(type: .system)
     button.setTitle("A", for: .normal)
     button.setTitleColor(UIColor.systemBlue, for: .normal)
@@ -69,8 +69,6 @@ class PopoverVC: UIViewController {
     $0.translatesAutoresizingMaskIntoConstraints = false
     return $0
   }(UIStackView())
-  
-  private let userDefaults = UserDefaults()
   
   // MARK: - LIFECYCLE
   
@@ -120,16 +118,14 @@ class PopoverVC: UIViewController {
   
   @objc
   private func didTapZoomOut(_ sender: UIButton) {
-    //    guard let value = userDefaults.value(forKey: "zoom") as? CGFloat else { return }
-    //    dump(value)
-//    currentValue -= stepValue
-//    NotificationCenter.default.post(name: Notification.Name(rawValue: "zoomOut"),
-//                                    object: currentValue)
+    currentValue -= stepValue
+    NotificationCenter.default.post(name: Notification.Name(rawValue: "zoomOut"),
+                                    object: currentValue)
     
-//    if currentValue <= minimumValue {
-//      zoomOutButton.isEnabled = false
-//      return
-//    }
+    if currentValue <= minimumValue {
+      zoomOutButton.isEnabled = false
+      return
+    }
     
     zoomInButton.isEnabled = true
     zoomOutButton.isEnabled = true

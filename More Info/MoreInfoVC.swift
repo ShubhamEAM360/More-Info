@@ -107,14 +107,13 @@ final class MoreInfoVC: UIViewController {
   }
   
   // MARK: HANDLERS
-//  private let userDefaults = UserDefaults()
+  
   @objc
   private func didTapZoomOut(_ sender: NSNotification) {
     guard let cell = tableView.cellForRow(at: IndexPath(row: 0,
                                                         section: section)) as? MoreInfoCell else { return }
     if let fontSize = sender.object as? CGFloat {
       cell.contentTextView.font = .systemFont(ofSize: fontSize)
-//      userDefaults.setValue(fontSize, forKey: "zoom")
     }
     cell.updateTextViewConstraints()
   }
