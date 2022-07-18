@@ -7,8 +7,7 @@
 import UIKit
 
 protocol MoreInfoCellDelegate: AnyObject {
-  func didTapButton(_ sender: UIButton)
-  func buttonAction(WithIndexPath indexPath: IndexPath)
+  func buttonAction(_ sender: UIButton, WithIndexPath indexPath: IndexPath)
 }
 
 final class MoreInfoCell: UITableViewCell {
@@ -18,6 +17,7 @@ final class MoreInfoCell: UITableViewCell {
   public static let identifier = "MoreInfoEditableCell"
   public var textChanged: ((String) -> Void)?
   public var indexPath: IndexPath?
+  public var currentZoomLevel: CGFloat = 16
   public weak var cellDelegate: MoreInfoCellDelegate?
   private var fillContextViewBottomAnchor: NSLayoutConstraint!
   private var depriveContextViewBottomAnchor: NSLayoutConstraint!
@@ -28,6 +28,7 @@ final class MoreInfoCell: UITableViewCell {
 """,
                                                        font: .systemFont(ofSize: 16),
                                                        textColor: .label)
+//  let pub = NotificationCenter.default.publisher(for:  NSControl.textDidChangeNotification, object: contentTextView)
   
   public let dividerView: UIView = {
     $0.translatesAutoresizingMaskIntoConstraints = false
@@ -139,11 +140,8 @@ final class MoreInfoCell: UITableViewCell {
   
   @objc
   private func didTapZoomButton(_ sender: UIButton) {
-    guard let indexPath = indexPath else {
-      return
-    }
-    cellDelegate?.didTapButton(sender)
-    cellDelegate?.buttonAction(WithIndexPath: indexPath)
+    guard let indexPath = indexPath else { return }
+    cellDelegate?.buttonAction(sender, WithIndexPath: indexPath)
   }
   
   @objc

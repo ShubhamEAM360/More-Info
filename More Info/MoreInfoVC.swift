@@ -8,6 +8,10 @@ import UIKit
 
 typealias TableViewDelegateAndDataSource = UITableViewDataSource & UITableViewDelegate
 
+class Fonts {
+  static var currentZoomLevel: CGFloat = 16
+}
+
 final class MoreInfoVC: UIViewController {
   var data: [String] = [
     "DESCRIPTION :",
@@ -24,6 +28,8 @@ final class MoreInfoVC: UIViewController {
   // MARK: - PROPERTIES
   
   private var section = Int()
+  private var fontSize = [CGFloat]()
+  
   
   private lazy var navBar: UINavigationBar = {
     $0.translatesAutoresizingMaskIntoConstraints = false
@@ -67,21 +73,10 @@ final class MoreInfoVC: UIViewController {
     super.viewDidLoad()
     view.backgroundColor = .systemGroupedBackground
     setupUI()
-    notificationCentre()
   }
   
   // MARK: - SELECTOR
-  
-  private func notificationCentre() {
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(didTapZoomOut(_:)),
-                                           name: Notification.Name("zoomOut"),
-                                           object: nil)
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(didTapZoomIn(_:)),
-                                           name: Notification.Name("zoomIn"),
-                                           object: nil)
-  }
+
   
   // MARK: SETUP UI
   
@@ -107,26 +102,6 @@ final class MoreInfoVC: UIViewController {
   }
   
   // MARK: HANDLERS
-  
-  @objc
-  private func didTapZoomOut(_ sender: NSNotification) {
-    guard let cell = tableView.cellForRow(at: IndexPath(row: 0,
-                                                        section: section)) as? MoreInfoCell else { return }
-    if let fontSize = sender.object as? CGFloat {
-      cell.contentTextView.font = .systemFont(ofSize: fontSize)
-    }
-    cell.updateTextViewConstraints()
-  }
-  
-  @objc
-  private func didTapZoomIn(_ sender: NSNotification) {
-    guard let cell = tableView.cellForRow(at: IndexPath(row: 0,
-                                                        section: section)) as? MoreInfoCell else { return }
-    if let fontSize = sender.object as? CGFloat {
-      cell.contentTextView.font = .systemFont(ofSize: fontSize)
-    }
-    cell.updateTextViewConstraints()
-  }
   
 }
 
@@ -154,6 +129,7 @@ extension MoreInfoVC: TableViewDelegateAndDataSource {
         self.tableView.endUpdates()
       }
     }
+
     if indexPath.section > 1 {
       cell.dividerView.isHidden = true
       cell.horizontalStack.isHidden = true
@@ -180,22 +156,24 @@ extension MoreInfoVC: TableViewDelegateAndDataSource {
 }
 
 extension MoreInfoVC: MoreInfoCellDelegate {
-  func buttonAction(WithIndexPath indexPath: IndexPath) {
-    switch indexPath.section {
-    case 0:
-      section = indexPath.section
-    case 1:
-      section = indexPath.section
-    default:
-      print("Nothing to do")
-    }
-  }
-  func didTapButton(_ sender: UIButton) {
+  func buttonAction(_ sender: UIButton, WithIndexPath indexPath: IndexPath) {
+    guard let cell = self.tableView.cellForRow(at: IndexPath(row: 0,
+                                                             section: indexPath.section)) as? MoreInfoCell else { return }
     let popoverVC = PopoverVC()
     popoverVC.modalPresentationStyle = .popover
     popoverVC.popoverPresentationController?.sourceView = sender
     popoverVC.popoverPresentationController?.permittedArrowDirections = .down
     popoverVC.popoverPresentationController?.delegate = self
+    
+    popoverVC.zoom = { zoom in
+      cell.contentTextView.font = .systemFont(ofSize: zoom)
+      cell.currentZoomLevel = zoom
+      cell.updateTextViewConstraints()
+    }
+    
+    popoverVC.currentValue = cell.currentZoomLevel
+    Fonts.currentZoomLevel = cell.currentZoomLevel
+    
     let _ = present(popoverVC, animated: true, completion: nil)
   }
 }
@@ -208,4 +186,3 @@ extension MoreInfoVC: UIPopoverPresentationControllerDelegate {
     return .none
   }
 }
-

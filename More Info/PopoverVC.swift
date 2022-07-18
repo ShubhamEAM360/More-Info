@@ -14,23 +14,24 @@ class PopoverVC: UIViewController {
   
   // MARK: - PROPERTIES
   
+  public var zoom: ((CGFloat) -> Void)?
+  
   /// Value that set as current value for Zoom level
   /// Default value is 16
-  private var currentValue: CGFloat = 16
+  public var currentValue: CGFloat = 16
   
   /// Value that used as minimum for the Zoom level
   /// Default value is 9
-  private var minimumValue: CGFloat = 9
+  public var minimumValue: CGFloat = 9
   
   /// Value that used as maximum for the Zoom level
   /// Default value is 23
-  private var maximumValue: CGFloat = 23
+  public var maximumValue: CGFloat = 23
   
   /// Stepper that used to increase or decrease the Zoom level with the specified value
   /// Default value is 1
   private var stepValue: CGFloat = 1
   
-  private var dope = CGFloat()
   
   public lazy var zoomOutButton: UIButton = {
     let button = UIButton(type: .system)
@@ -79,6 +80,18 @@ class PopoverVC: UIViewController {
     setupUI()
   }
   
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    if currentValue >= maximumValue || Fonts.currentZoomLevel >= maximumValue {
+      zoomInButton.isEnabled = false
+      return
+    }
+    if currentValue <= minimumValue || Fonts.currentZoomLevel <= minimumValue {
+      zoomOutButton.isEnabled = false
+      return
+    }
+  }
+
   // MARK: - SELECTOR
   
   // MARK: SETUP UI
@@ -105,13 +118,11 @@ class PopoverVC: UIViewController {
   @objc
   private func didTapZoomIn(_ sender: UIButton) {
     currentValue += stepValue
-    NotificationCenter.default.post(name: Notification.Name(rawValue: "zoomIn"),
-                                    object: currentValue)
+    zoom?(currentValue)
     if currentValue >= maximumValue {
       zoomInButton.isEnabled = false
       return
     }
-    
     zoomInButton.isEnabled = true
     zoomOutButton.isEnabled = true
   }
@@ -119,18 +130,15 @@ class PopoverVC: UIViewController {
   @objc
   private func didTapZoomOut(_ sender: UIButton) {
     currentValue -= stepValue
-    NotificationCenter.default.post(name: Notification.Name(rawValue: "zoomOut"),
-                                    object: currentValue)
-    
+    zoom?(currentValue)
     if currentValue <= minimumValue {
       zoomOutButton.isEnabled = false
       return
     }
-    
     zoomInButton.isEnabled = true
     zoomOutButton.isEnabled = true
   }
-  
+    
   // MARK: ACCESSIBILITY LABEL
   
   private func addAccessibilityLabels() {
